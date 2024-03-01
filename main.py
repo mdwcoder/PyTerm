@@ -26,11 +26,15 @@ class terminalClass():
         if command in self.commands:
             result = self.commands[command](prompt_l, self.ActiveDirectory)
         else:
-            print('Command not found, type "help" for help')
-            return
+            if command == "":
+                print(a.paintText(f"{self.ActiveDirectory} ➽  ", color='yellow'))
+                return
+            else:
+                print(a.paintText(f'Command "{command}" not found, type "help" for help', color='yellow'))
+                return
         if result is not None:
             if 'error' in result:
-                print(f"Error : {result.get('error')}")
+                print(a.paintText(f"Error : {result.get('error')}", color='red'))
                 return
             if 'ActiveDirectory' in result:
                 self.ActiveDirectory = result.get('ActiveDirectory')
@@ -40,7 +44,7 @@ class terminalClass():
     # Terminal process update
     def update(self):
         while(True):
-            command = input(f"{self.ActiveDirectory} >>")
+            command = input(a.paintText(f"{self.ActiveDirectory} ➢  "))
             self.execute(command)
             
             

@@ -1,5 +1,6 @@
 import os, platform, json
 import Module_B as b
+import Module_C as c
 from cfonts import render
 
 userPath = os.path.expanduser("~")
@@ -22,11 +23,14 @@ def dictCommands() -> dict:
         'cd':b.cd,
         'pwd':b.pwd,
         'ls':b.ls,
+        'rm':b.rm,
+        'mkdir':b.mkdir,
+        'help':c.help_,
         'exit':b.exit_,
     }
 
-def paintText(value):
-    return render(str(value), colors=['white', 'grey'], font='console')
+def paintText(value, color='green'):
+    return render(str(value), colors=[color, 'white'], font='console')[:-2]
 
 def isFirstTime() -> bool:
     return not os.path.exists(configPath)

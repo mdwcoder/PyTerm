@@ -1,4 +1,4 @@
-import os, platform, json
+import os, platform, json, shutil
 
 userPath = os.path.expanduser("~")
 configPath = f'{userPath}{os.sep}PyTerm{os.sep}config.json'
@@ -64,6 +64,44 @@ def ls(prompt_, ActiveDirectory):
     
 def pwd(prompt_, ActiveDirectory):
     print(ActiveDirectory)
+    
+def mkdir(prompt_, ActiveDirectory):
+    path = ""
+    for i in prompt_[1:]:
+        if not i.startswith("-"):
+            path = i
+            break
+        else:
+            path = ""
+    if os.path.exists(os.path.split(path)[0]):
+        os.mkdir(path)
+    elif os.path.exists(os.path.split(f"{ActiveDirectory}{path}")[0]):
+        os.mkdir(f"{ActiveDirectory}{path}")
+    else:
+        return {'error':'path not found'}
+    
+def rm(prompt_, ActiveDirectory):
+    path = ""
+    for i in prompt_[1:]:
+        if not i.startswith("-"):
+            path = i
+            break
+        else:
+            path = ""
+    try:
+        if os.path.isfile(path):  # Verificar si la ruta es un archivo
+            os.remove(path)
+            return {'mensaje': f"El archivo {path} ha sido eliminado correctamente."}
+        elif os.path.isdir(path):  # Verificar si la ruta es un directorio
+            shutil.rmtree(path)
+            return {'mensaje': f"El directorio {path} y su contenido han sido eliminados correctamente."}
+        else:
+            return {'error': f"La ruta {path} no corresponde a un archivo ni a un directorio."}
+    except OSError as e:
+        return {'error': f"Error al eliminar la ruta {path}: {e}"}
+
+
+
     
 def exit_(a,b):
     exit()
