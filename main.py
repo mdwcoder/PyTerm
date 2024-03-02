@@ -10,9 +10,9 @@ class terminalClass():
     # Init Detect and Load System
     def IDLS(self):
         if a.isFirstTime:
-            print(render('PyTerminal', colors=['red', 'yellow'], align='center', line_height=3, font='chrome'))
+            print(render('Welcome to PyTerminal', colors=['red', 'yellow'], align='center', line_height=3, font='chrome'))
         else:
-            pass
+            print(render('PyTerminal', colors=['red', 'yellow'], align='center', line_height=3, font='chrome'))
         self.ActiveDirectory = a.startDirectory()
         self.commands = a.dictCommands()
             
@@ -38,7 +38,6 @@ class terminalClass():
                 return
             if 'ActiveDirectory' in result:
                 self.ActiveDirectory = result.get('ActiveDirectory')
-
 
     
     # Terminal process update

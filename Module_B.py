@@ -1,4 +1,4 @@
-import os, platform, json, shutil
+import os, platform, json, shutil, re
 
 userPath = os.path.expanduser("~")
 configPath = f'{userPath}{os.sep}PyTerm{os.sep}config.json'
@@ -15,8 +15,16 @@ def cd(prompt_, ActiveDirectory):
     if path == "" or path == "~":
         return {'ActiveDirectory':userPath}
     else:
-        if path == "..":
-            return {'ActiveDirectory':os.path.split(ActiveDirectory)[0]}
+        if ".." in path:
+            if os.sep in path:
+                NumDobleDot = len(re.findall(r'\.\.', path))
+                UseDirectory = ActiveDirectory
+                for i in range(0,NumDobleDot):
+                    UseDirectory = os.path.split(UseDirectory)[0]
+                return {'ActiveDirectory':UseDirectory}
+            else:
+                if path == "..":
+                    return {'ActiveDirectory':os.path.split(ActiveDirectory)[0]}
         else:
             if path.startswith("./") or path.startswith(".\\"):
                 path = path[1:]
@@ -100,8 +108,11 @@ def rm(prompt_, ActiveDirectory):
     except OSError as e:
         return {'error': f"Error al eliminar la ruta {path}: {e}"}
 
+def navigate(prompt_, ActiveDirectory):
+    pass
 
-
+def grep(prompt_, ActiveDirectory):
+    pass
     
 def exit_(a,b):
     exit()

@@ -29,8 +29,8 @@ def dictCommands() -> dict:
         'exit':b.exit_,
     }
 
-def paintText(value, color='green'):
-    return render(str(value), colors=[color, 'white'], font='console')[:-2]
+def paintText(value, color='green',align='left'):
+    return render(str(value), colors=[color, 'white'], font='console', align=align)[:-2]
 
 def isFirstTime() -> bool:
     return not os.path.exists(configPath)
