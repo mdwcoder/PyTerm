@@ -48,7 +48,7 @@ def cd(prompt_, ActiveDirectory):
                     return{'error':'path not found'}
     
 def ls(prompt_, ActiveDirectory):
-    def custome_print(lista):
+    def custom_print(lista):
         for i in range(0, len(lista), 3):
             fila = lista[i:i+3]
             print("".join(word.ljust(15) for word in fila))
@@ -60,14 +60,14 @@ def ls(prompt_, ActiveDirectory):
                 path = i
                 break
             else:
-                custome_print(os.listdir(ActiveDirectory))
+                custom_print(os.listdir(ActiveDirectory))
                 return
         if os.path.exists(path):
-            custome_print(os.listdir(path))
+            custom_print(os.listdir(path))
         else:
             return {'error':'path not found'}
     else:
-        custome_print(os.listdir(ActiveDirectory))
+        custom_print(os.listdir(ActiveDirectory))
         return
     
 def pwd(prompt_, ActiveDirectory):

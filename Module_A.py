@@ -1,10 +1,29 @@
-import os, platform, json
+import os, platform, json, subprocess, sys
 import Module_B as b
 import Module_C as c
 from cfonts import render
 
 userPath = os.path.expanduser("~")
 configPath = f'{userPath}{os.sep}PyTerm{os.sep}config.json'
+    
+def admin_gestor(a, b):
+    def reiniciar_con_permisos_admin():
+        if os.name == 'posix':  # unix
+            if os.getuid() == 0: 
+                os.execl(sys.executable, sys.executable, *sys.argv)
+            else:  
+                {'error':'You already are an admin'}
+        elif os.name == 'nt':  # Windows
+            import ctypes
+            shell32 = ctypes.windll.shell32
+            if shell32.IsUserAnAdmin() == 0: 
+                shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+                sys.exit(0)
+            else: 
+                {'error':'You already are an admin'}
+
+def user_gestor(prompt_, ActiveDirectory):
+    os.execl(sys.executable, sys.executable, *sys.argv)
 
 def FirstSave(dicData):
     if not os.path.exists(configPath):
@@ -26,6 +45,8 @@ def dictCommands() -> dict:
         'rm':b.rm,
         'mkdir':b.mkdir,
         'help':c.help_,
+        'admin': admin_gestor,
+        'restart':user_gestor,
         'exit':b.exit_,
     }
 

@@ -49,6 +49,19 @@ x               {a.paintText("CD HELP", 'yellow', 'center')}
                Arguments 
                **Coming soon
              """,
+        'admin':f"""
+               {separador}
+               ADMIN HELP
+               {separador}
+               Type "admin" to change the permissions to admin. 
+        """,
+        'restart':f"""
+               {separador}
+               RESTAR HELP
+               {separador}
+               Type "restar" to shutdown and power on pyterminal.
+               Is for reset the permissions or when you see some errors.
+        """,
         'exit':f"""
                {separador}
                {a.paintText("EXIT HELP", 'yellow', 'center')}
