@@ -47,6 +47,7 @@ def dictCommands() -> dict:
         'help':c.help_,
         'admin': admin_gestor,
         'restart':user_gestor,
+        'navigate':b.navigate,
         'exit':b.exit_,
     }
 
