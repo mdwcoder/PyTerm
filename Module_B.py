@@ -1,9 +1,8 @@
 import os, platform, json, shutil, re
 import requests
-from bs4 import BeautifulSoup
 import Module_A as a
-from googlesearch import search
-
+from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
 
 userPath = os.path.expanduser("~")
 configPath = f'{userPath}{os.sep}PyTerm{os.sep}config.json'
@@ -113,24 +112,36 @@ def rm(prompt_, ActiveDirectory):
     except OSError as e:
         return {'error': f"Error al eliminar la ruta {path}: {e}"}
 
-def search_google(query):
-    results = search(query, num=5, stop=5, pause=2)
-    return results
-
-def terminal_browser():
-    while True:
-        query = input("Ingresa tu búsqueda (Presiona 'q' para salir): ")
-        if query.lower() == 'q':
-            break
-        else:
-            print("Resultados de la búsqueda:")
-            results = search_google(query)
-            for j, result in enumerate(results, start=1):
-                print(f"{j}. {result}")
-
-    
 def navigate(prompt_, ActiveDirectory):
-    terminal_browser()
+    def search(url):
+        response = requests.get(url)
+        html_content = response.text
+        soup = BeautifulSoup(html_content, "html.parser")
+        PatronGenerico = r'<(.*?)>' ; PatronAbiertos = r'<(?!.*?/).*?>' ; PatronCerrados = r'</(.*?)>' ; PatronUni = r'<.*?/>'
+        elementDict = dict
+        open_list = []
+        close_list = []
+        uni_list = []
+        for elemento in re.findall(PatronGenerico, soup):
+            if re.match(PatronAbiertos, elemento):
+                elementDict[elemento] = "Open"
+            elif  re.match(PatronCerrados, elemento):
+                elementDict[elemento] = "Close"
+            elif re.match(PatronUni, elemento):
+                elementDict[elemento] = "Uni"
+            else:
+                elementDict[elemento] = "Error"
+
+
+    while(True):
+        url = input("Type your url  or 'exit' to go back\n>> ")
+        if url == 'exit':
+            break
+        if "http" not in url:
+            url = f"http://{url}"
+        search(url)
+
+
     
 def grep(prompt_, ActiveDirectory):
     pass

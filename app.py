@@ -21,7 +21,10 @@ class terminalClass():
         prompt_l = prompt_.split(" ")
         command = prompt_l[0]
         if command == "clear":
-            os.system("printf '\033c'")
+            if os.name == 'nt':  # Windows
+                os.system('cls')
+            else:  # Unix/Linux/Mac
+                os.system('clear')
             return
         if command in self.commands:
             result = self.commands[command](prompt_l, self.ActiveDirectory)
@@ -43,7 +46,7 @@ class terminalClass():
     # Terminal process update
     def update(self):
         while(True):
-            command = input(a.paintText(f"{self.ActiveDirectory} ➢  "))
+            command = input(a.paintText(f"{self.ActiveDirectory} ➢")+"  ")
             self.execute(command)
             
             
