@@ -1,7 +1,6 @@
 import os, platform, json, shutil, re
 import requests
 import Module_A as a
-from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
 userPath = os.path.expanduser("~")
@@ -73,6 +72,25 @@ def ls(prompt_, ActiveDirectory):
     else:
         custom_print(os.listdir(ActiveDirectory))
         return
+    
+def cat(prompt_, ActiveDirectory):
+    def run(num):
+        if os.path.isfile(prompt_[num]):
+            f = open(prompt_[num])
+            print(f.read(), "a")
+            f.close()
+        elif os.path.isfile(f"{ActiveDirectory}{os.sep}{prompt_[num]}"):
+            f = open(f"{ActiveDirectory}{os.sep}{prompt_[num]}")
+            print(f.read(), "a")
+            f.close()
+        else:
+            return {'error':f'file "{prompt_[num]}" not found'}
+    Nl = len(prompt_)-1 ; errorL = []
+    if Nl == 0:
+        run(1)
+    else:
+        for i in range(1, Nl):
+            run(i)
     
 def pwd(prompt_, ActiveDirectory):
     print(ActiveDirectory)

@@ -16,32 +16,47 @@ class terminalClass():
         self.ActiveDirectory = a.startDirectory()
         self.commands = a.dictCommands()
             
-    # Terminal command execute
+    # Terminal command execute|
     def execute(self, prompt_):
-        prompt_l = prompt_.split(" ")
-        command = prompt_l[0]
-        if command == "clear":
-            if os.name == 'nt':  # Windows
-                os.system('cls')
-            else:  # Unix/Linux/Mac
-                os.system('clear')
-            return
-        if command in self.commands:
-            result = self.commands[command](prompt_l, self.ActiveDirectory)
+        Nl = prompt_.count("|") ; result_L = [] 
+        if Nl < 1:
+            promptU = [prompt_]
+            Nl = 1
         else:
-            if command == "":
-                print(a.paintText(f"{self.ActiveDirectory} ➽  ", color='yellow'))
+            promptU = prompt_.split("|")
+        for i in range(0,Nl):
+            prompt_l = promptU[i].split(" ")
+            command = prompt_l[0]
+            if command == "clear":
+                if os.name == 'nt':  # Windows
+                    os.system('cls')
+                else:  # Unix/Linux/Mac
+                    os.system('clear')
                 return
+            if command in self.commands:
+                try:
+                    if prompt_l.count("[arg]") > 1:
+                        result = self.commands[command](a.replace_items(prompt_l, result_L[i].split(" ")), self.ActiveDirectory)
+                    else:
+                        result = self.commands[command](prompt_l.replace("[arg]", result_L[i]), self.ActiveDirectory)
+                except:
+                    result = self.commands[command](prompt_l, self.ActiveDirectory)
+                result_L.append(result)
             else:
-                print(a.paintText(f'Command "{command}" not found, type "help" for help', color='yellow'))
-                return
-        if result is not None:
-            if 'error' in result:
-                print(a.paintText(f"Error : {result.get('error')}", color='red'))
-                return
-            if 'ActiveDirectory' in result:
-                self.ActiveDirectory = result.get('ActiveDirectory')
-
+                if command == "":
+                    print(a.paintText(f"{self.ActiveDirectory} ➽  ", color='yellow'))
+                    result_L.append("")
+                    return
+                else:
+                    print(a.paintText(f'Command "{command}" not found, type "help" for help', color='yellow'))
+                    result_L.append("")
+                    return
+            if result is not None:
+                if 'error' in result:
+                    print(a.paintText(f"Error : {result.get('error')}", color='red'))
+                    return
+                if 'ActiveDirectory' in result:
+                    self.ActiveDirectory = result.get('ActiveDirectory')
     
     # Terminal process update
     def update(self):

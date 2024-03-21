@@ -44,6 +44,7 @@ def dictCommands() -> dict:
         'pwd':b.pwd,
         'ls':b.ls,
         'rm':b.rm,
+        'cat':b.cat,
         'mkdir':b.mkdir,
         'help':c.help_,
         'admin': admin_gestor,
@@ -56,4 +57,12 @@ def paintText(value, color='green',align='left'):
     return render(str(value), colors=[color, 'white'], font='console', align=align)[:-2]
 
 def isFirstTime() -> bool:
+    if not os.path.exists(configPath):
+        FirstSave("")
     return not os.path.exists(configPath)
+
+def replace_items(base_list, replace_list):
+    for i in range(len(replace_list)):
+        if replace_list[i] != "[arg]":
+            base_list[i] = replace_list[i]
+    return base_list
