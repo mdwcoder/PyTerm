@@ -46,6 +46,7 @@ def dictCommands() -> dict:
         'rm':b.rm,
         'cat':b.cat,
         'mkdir':b.mkdir,
+        'grep':b.grep,
         'help':c.help_,
         'admin': admin_gestor,
         'restart':user_gestor,

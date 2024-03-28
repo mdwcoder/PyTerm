@@ -1,6 +1,7 @@
 import os, platform, json, shutil, re
 import requests
 import Module_A as a
+import Module_D as d
 from bs4 import BeautifulSoup
 
 userPath = os.path.expanduser("~")
@@ -130,7 +131,7 @@ def rm(prompt_, ActiveDirectory):
     except OSError as e:
         return {'error': f"Error al eliminar la ruta {path}: {e}"}
 
-def navigate(prompt_, ActiveDirectory):
+def navigate(prompt_, ActiveDirectory): # Errores varios...
     def search(url):
         response = requests.get(url)
         html_content = response.text
@@ -162,7 +163,59 @@ def navigate(prompt_, ActiveDirectory):
 
     
 def grep(prompt_, ActiveDirectory):
-    pass
+    def manyarguments(lista):
+        contador = 0
+        for elemento in lista:
+            if elemento in ["-r", "-f", "-t"]:
+                contador += 1
+                if contador >= 2:
+                    return True
+        return False
+    def listTextFiles(dirpath):
+        archivos_texto = []
+        for root, dirs, files in os.walk(dirpath):
+            for file in files:
+                archivo = os.path.join(root, file)
+                if os.path.isfile(archivo) and os.access(archivo, os.R_OK):
+                    archivos_texto.append(archivo)
+        return archivos_texto
+
+    if "-r" not in prompt_ or "-f" not in prompt_ or "-t" not in prompt_:
+        return {'error':'grep need arguments, type "help grep" for help'}
+    if manyarguments(prompt_):
+        return {'error':'Grep can only have 1 main argument, type "help grep" for help'}
+    if "-r" in prompt_:
+        if len(prompt_) != 4:
+            return {'error':'sintax error grep -r <directory path> <filter>'}
+        else:
+            try:
+                startDirectory = d.normalDir(prompt_[2])['value']
+            except:
+                return {'error':d.normalDir(prompt_[2])['error']}
+            textFiles = listTextFiles(startDirectory)
+            filter_ = prompt_[3]
+            dictData = {} ; routes = []
+            for file_ in textFiles:
+                f = open(file_, 'r')
+                dictData[file_] = f.read()
+                f.close()
+            for key in dictData.keys:
+                if filter_ in dictData[key]:
+                    routes.append(key)
+            for i in routes:
+                print(i)
+    if "-f" in prompt_:
+        if "-c" in prompt_ and "-l" in prompt_:
+            return {'error':'Grep -f can only have 1 secondary argument'}
+        if "-c" in prompt_:
+            pass
+        elif "-l" in prompt_:
+            pass
+        else:
+            return {'error':'Grep need one secondary argument, type "Grep help" for help'}
+    if "-t" in prompt_:
+        pass
+    
     
 def exit_(a,b):
     exit()
