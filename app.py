@@ -26,6 +26,7 @@ class terminalClass():
             promptU = prompt_.split("|")
         for i in range(0,Nl):
             prompt_l = promptU[i].split(" ")
+            command = prompt_l[0].lower()
             if command == "clear":
                 if os.name == 'nt':  # Windows
                     os.system('cls')
