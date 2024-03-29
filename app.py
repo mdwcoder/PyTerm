@@ -18,29 +18,31 @@ class terminalClass():
             
     # Terminal command execute|
     def execute(self, prompt_):
-        Nl = prompt_.count("|") ; result_L = [] 
-        if Nl < 1:
+        commands = self.commands
+        result_L = []
+        
+        if "|" not in prompt_:
             promptU = [prompt_]
-            Nl = 1
         else:
             promptU = prompt_.split("|")
-        for i in range(0,Nl):
-            prompt_l = promptU[i].split(" ")
+        
+        for prompt_part in promptU:
+            prompt_l = prompt_part.split()
             command = prompt_l[0].lower()
+            
             if command == "clear":
-                if os.name == 'nt':  # Windows
-                    os.system('cls')
-                else:  # Unix/Linux/Mac
-                    os.system('clear')
+                os.system('cls' if os.name == 'nt' else 'clear')
                 return
-            if command in self.commands:
+
+            if command in commands:
                 try:
-                    if prompt_l.count("[arg]") > 1:
-                        result = self.commands[command](a.replace_items(prompt_l, result_L[i].split(" ")), self.ActiveDirectory)
+                    arg_index = prompt_l.index("[arg]") if "[arg]" in prompt_l else -1
+                    if arg_index > 0:
+                        result = commands[command](a.replace_items(prompt_l, result_L[-1].split()), self.ActiveDirectory)
                     else:
-                        result = self.commands[command](prompt_l.replace("[arg]", result_L[i]), self.ActiveDirectory)
-                except:
-                    result = self.commands[command](prompt_l, self.ActiveDirectory)
+                        result = commands[command](' '.join(prompt_l).replace("[arg]", result_L[-1]), self.ActiveDirectory)
+                except Exception as e:
+                    result = commands[command](prompt_l, self.ActiveDirectory)
                 result_L.append(result)
             else:
                 if command == "":
@@ -51,12 +53,14 @@ class terminalClass():
                     print(a.paintText(f'Command "{command}" not found, type "help" for help', color='yellow'))
                     result_L.append("")
                     return
+
             if result is not None:
                 if 'error' in result:
                     print(a.paintText(f"Error : {result.get('error')}", color='red'))
                     return
                 if 'ActiveDirectory' in result:
                     self.ActiveDirectory = result.get('ActiveDirectory')
+
     
     # Terminal process update
     def update(self):

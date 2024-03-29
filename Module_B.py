@@ -177,6 +177,8 @@ def grep(prompt_, ActiveDirectory):
                     archivos_texto.append(archivo)
         return archivos_texto
     
+    Npath = next((i for i, x in enumerate(prompt_[1:], 1) if not x.startswith("-")), None)
+    
     if len(prompt_) >= 4:
         filter_ = prompt_[3]
     
@@ -194,9 +196,9 @@ def grep(prompt_, ActiveDirectory):
             if "-c" in prompt_ and "-l" in prompt_:
                 return {'error':'Grep -f can only have 1 secondary argument'}
             try:
-                startDirectory = d.normalDir(ActiveDirectory, prompt_[2])['value']
+                startDirectory = d.normalDir(ActiveDirectory, prompt_[Npath])['value']
             except:
-                return {'error':d.normalDir(prompt_[2])['error']}
+                return {'error':d.normalDir(ActiveDirectory ,prompt_[Npath])['error']}
             textFiles = listTextFiles(startDirectory)
             dictData = {}
             routes = []
@@ -204,17 +206,19 @@ def grep(prompt_, ActiveDirectory):
                 try:
                     with open(file_, 'r') as f:
                         dictData[file_] = f.read()
-                except FileNotFoundError:
-                    pass  # Omitir archivos que no se pueden leer
+                except :
+                    pass  
             CounterR = 0
             for key in dictData.keys():
-                if filter_ in dictData[key]:
-                    Counter0 += 1
+                if filter_ in dictData[key]:  # Verificar si el filtro está en el contenido del archivo
+                    CounterR += 1  # Incrementar CounterR solo si se encuentra el filtro
                     routes.append(key)
                     if "-l" in prompt_:
                         for line in dictData[key].split("\n"):
                             if filter_ in line:
                                 print(line)
+
+
             if "-c" in prompt_:
                 print(CounterR)
             elif "-l" not in prompt_:
@@ -225,16 +229,18 @@ def grep(prompt_, ActiveDirectory):
         if "-c" in prompt_ and "-l" in prompt_:
             return {'error':'Grep -f can only have 1 secondary argument'}
         try:
-            filePath = d.normalFile(ActiveDirectory, prompt_[2])['value']
-        except:
-            return {'error':d.normalDir(ActiveDirectory, prompt_[2])['error']}
-        if "-c" in prompt_:
+            filePath = d.normalFile(ActiveDirectory, prompt_[Npath])['value']
             print(filePath)
+        except:
+            return {'error':d.normalDir(ActiveDirectory, prompt_[Npath])['error']}
+        print(filePath)
+        if "-c" in prompt_:
             with open(filePath, "r") as f:
                 CounterF = f.read().count(filter_)
             print(CounterF)
         else:
-            pass
+            with open(filePath, "r") as f:
+                pass
     
     if "-t" in prompt_:
         pass

@@ -1,23 +1,5 @@
 import os
 
-def normalFile(actualpath : str, filepath : str):
-    if os.path.isfile(filepath):
-        return {'value':filepath}
-    else: 
-        if actualpath[-1] == os.sep:
-            actualpathA = actualpath[:-1]
-        else:
-            actualpathA = actualpath
-        if filepath[0] == os.sep:
-            filepathA = filepath[1:]
-        else:
-            filepathA = filepath
-        testpath = f"{actualpathA}{os.sep}{filepathA}"
-        if os.path.isfile(testpath):
-            return {'value':testpath}
-        else:
-            return {'error':f'{filepath} does not exist.'}
-    
 def normalDir(actualpath : str, dirpath : str):
     if dirpath == "..":
         return {'value':os.path.split(actualpath)[0]}
@@ -43,4 +25,15 @@ def normalDir(actualpath : str, dirpath : str):
             return {'value':testpath}
         else:
             return {'error':f'{dirpath} does not exist.'}
+    
+def normalFile(actualpath: str, filepath: str):
+    # Obtener el directorio normalizado del archivo
+    result = normalDir(actualpath, os.path.dirname(filepath))
+    if 'value' in result:
+        # Si se encuentra el directorio, devolver la ruta completa del archivo
+        return {'value': os.path.join(result['value'], os.path.basename(filepath))}
+    else:
+        # Si hay un error al normalizar el directorio, devolver el mismo error
+        return {'error': result['error']}
+
     
