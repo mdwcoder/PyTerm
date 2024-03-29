@@ -1,11 +1,15 @@
-import os, platform, json, shutil, re
+import os
+import platform
+import json
+import shutil
+import re
 import requests
 import Module_A as a
 import Module_D as d
 from bs4 import BeautifulSoup
 
 userPath = os.path.expanduser("~")
-configPath = f'{userPath}{os.sep}PyTerm{os.sep}config.json'
+configPath = os.path.join(userPath, "PyTerm", "config.json")
 
 # Commands
 def cd(prompt_, ActiveDirectory):
@@ -17,40 +21,29 @@ def cd(prompt_, ActiveDirectory):
         else:
             path = ""
     if path == "" or path == "~":
-        return {'ActiveDirectory':userPath}
+        return {'ActiveDirectory': userPath}
     else:
         if ".." in path:
             if os.sep in path:
                 NumDobleDot = len(re.findall(r'\.\.', path))
                 UseDirectory = ActiveDirectory
-                for i in range(0,NumDobleDot):
+                for i in range(0, NumDobleDot):
                     UseDirectory = os.path.split(UseDirectory)[0]
-                return {'ActiveDirectory':UseDirectory}
+                return {'ActiveDirectory': UseDirectory}
             else:
                 if path == "..":
-                    return {'ActiveDirectory':os.path.split(ActiveDirectory)[0]}
+                    return {'ActiveDirectory': os.path.split(ActiveDirectory)[0]}
+        elif path == ".":
+            return {'ActiveDirectory': ActiveDirectory}
         else:
             if path.startswith("./") or path.startswith(".\\"):
                 path = path[1:]
-            if os.path.exists(path):
-                if path[-1:] == os.sep:
-                    newPath = f"{ActiveDirectory}{path}"
-                else:
-                    newPath = f"{ActiveDirectory}{os.sep}{path}"
-                if os.path.exists(newPath):
-                    return{'ActiveDirectory':newPath}
-                else:
-                    return{'error':'path not found'}
+            result = d.normalDir(ActiveDirectory, path)
+            if 'value' in result:
+                return {'ActiveDirectory': result['value']}
             else:
-                if path[-1:] == os.sep:
-                    newPath = f"{ActiveDirectory}{path}"
-                else:
-                    newPath = f"{ActiveDirectory}{os.sep}{path}"
-                if os.path.exists(newPath):
-                    return{'ActiveDirectory':newPath}
-                else:
-                    return{'error':'path not found'}
-    
+                return {'error': result['error']}
+
 def ls(prompt_, ActiveDirectory):
     def custom_print(lista):
         for i in range(0, len(lista), 3):
@@ -73,29 +66,33 @@ def ls(prompt_, ActiveDirectory):
     else:
         custom_print(os.listdir(ActiveDirectory))
         return
-    
+
 def cat(prompt_, ActiveDirectory):
     def run(num):
         if os.path.isfile(prompt_[num]):
-            f = open(prompt_[num])
-            print(f.read(), "a")
-            f.close()
-        elif os.path.isfile(f"{ActiveDirectory}{os.sep}{prompt_[num]}"):
-            f = open(f"{ActiveDirectory}{os.sep}{prompt_[num]}")
-            print(f.read(), "a")
-            f.close()
+            try:
+                with open(prompt_[num], 'r') as f:
+                    print(f.read(), "a")
+            except FileNotFoundError:
+                return {'error': f'file "{prompt_[num]}" not found'}
+        elif os.path.isfile(os.path.join(ActiveDirectory, prompt_[num])):
+            try:
+                with open(os.path.join(ActiveDirectory, prompt_[num]), 'r') as f:
+                    print(f.read(), "a")
+            except FileNotFoundError:
+                return {'error': f'file "{prompt_[num]}" not found'}
         else:
-            return {'error':f'file "{prompt_[num]}" not found'}
-    Nl = len(prompt_)-1 ; errorL = []
+            return {'error': f'file "{prompt_[num]}" not found'}
+    Nl = len(prompt_) - 1
     if Nl == 0:
         run(1)
     else:
         for i in range(1, Nl):
             run(i)
-    
+
 def pwd(prompt_, ActiveDirectory):
     print(ActiveDirectory)
-    
+
 def mkdir(prompt_, ActiveDirectory):
     path = ""
     for i in prompt_[1:]:
@@ -106,11 +103,11 @@ def mkdir(prompt_, ActiveDirectory):
             path = ""
     if os.path.exists(os.path.split(path)[0]):
         os.mkdir(path)
-    elif os.path.exists(os.path.split(f"{ActiveDirectory}{path}")[0]):
-        os.mkdir(f"{ActiveDirectory}{path}")
+    elif os.path.exists(os.path.split(os.path.join(ActiveDirectory, path))[0]):
+        os.mkdir(os.path.join(ActiveDirectory, path))
     else:
         return {'error':'path not found'}
-    
+
 def rm(prompt_, ActiveDirectory):
     path = ""
     for i in prompt_[1:]:
@@ -161,7 +158,6 @@ def navigate(prompt_, ActiveDirectory): # Errores varios...
         search(url)
 
 
-    
 def grep(prompt_, ActiveDirectory):
     def manyarguments(lista):
         contador = 0
@@ -171,6 +167,7 @@ def grep(prompt_, ActiveDirectory):
                 if contador >= 2:
                     return True
         return False
+    
     def listTextFiles(dirpath):
         archivos_texto = []
         for root, dirs, files in os.walk(dirpath):
@@ -179,43 +176,70 @@ def grep(prompt_, ActiveDirectory):
                 if os.path.isfile(archivo) and os.access(archivo, os.R_OK):
                     archivos_texto.append(archivo)
         return archivos_texto
-
-    if "-r" not in prompt_ or "-f" not in prompt_ or "-t" not in prompt_:
-        return {'error':'grep need arguments, type "help grep" for help'}
+    
+    if len(prompt_) >= 4:
+        filter_ = prompt_[3]
+    
+    if "-r" not in prompt_ and "-f" not in prompt_ and "-t" not in prompt_:
+        return {'error':'grep needs arguments, type "help grep" for help'}
+    
     if manyarguments(prompt_):
         return {'error':'Grep can only have 1 main argument, type "help grep" for help'}
+    
     if "-r" in prompt_:
-        if len(prompt_) != 4:
-            return {'error':'sintax error grep -r <directory path> <filter>'}
+        print(prompt_)
+        if len(prompt_) < 4:
+            return {'error':'syntax error grep -r <directory path> <filter>'}
         else:
+            if "-c" in prompt_ and "-l" in prompt_:
+                return {'error':'Grep -f can only have 1 secondary argument'}
             try:
-                startDirectory = d.normalDir(prompt_[2])['value']
+                startDirectory = d.normalDir(ActiveDirectory, prompt_[2])['value']
             except:
                 return {'error':d.normalDir(prompt_[2])['error']}
             textFiles = listTextFiles(startDirectory)
-            filter_ = prompt_[3]
-            dictData = {} ; routes = []
+            dictData = {}
+            routes = []
             for file_ in textFiles:
-                f = open(file_, 'r')
-                dictData[file_] = f.read()
-                f.close()
-            for key in dictData.keys:
+                try:
+                    with open(file_, 'r') as f:
+                        dictData[file_] = f.read()
+                except FileNotFoundError:
+                    pass  # Omitir archivos que no se pueden leer
+            CounterR = 0
+            for key in dictData.keys():
                 if filter_ in dictData[key]:
+                    Counter0 += 1
                     routes.append(key)
-            for i in routes:
-                print(i)
+                    if "-l" in prompt_:
+                        for line in dictData[key].split("\n"):
+                            if filter_ in line:
+                                print(line)
+            if "-c" in prompt_:
+                print(CounterR)
+            elif "-l" not in prompt_:
+                for i in routes:
+                    print(i)
+    
     if "-f" in prompt_:
         if "-c" in prompt_ and "-l" in prompt_:
             return {'error':'Grep -f can only have 1 secondary argument'}
+        try:
+            filePath = d.normalFile(ActiveDirectory, prompt_[2])['value']
+        except:
+            return {'error':d.normalDir(ActiveDirectory, prompt_[2])['error']}
         if "-c" in prompt_:
-            pass
-        elif "-l" in prompt_:
-            pass
+            print(filePath)
+            with open(filePath, "r") as f:
+                CounterF = f.read().count(filter_)
+            print(CounterF)
         else:
-            return {'error':'Grep need one secondary argument, type "Grep help" for help'}
+            pass
+    
     if "-t" in prompt_:
         pass
-    
-    
+
+
+
 def exit_(a,b):
     exit()

@@ -19,6 +19,10 @@ def normalFile(actualpath : str, filepath : str):
             return {'error':f'{filepath} does not exist.'}
     
 def normalDir(actualpath : str, dirpath : str):
+    if dirpath == "..":
+        return {'value':os.path.split(actualpath)[0]}
+    elif dirpath == ".":
+        return {'value':actualpath}
     if os.path.exists(dirpath):
         if os.path.isfile(dirpath):
             return {'error':f'{dirpath} is a file.'}

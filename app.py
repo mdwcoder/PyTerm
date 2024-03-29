@@ -61,6 +61,8 @@ class terminalClass():
     # Terminal process update
     def update(self):
         while(True):
+            if self.ActiveDirectory.count(f"{os.sep}.") > 0:
+                self.ActiveDirectory.replace(f"{os.sep}.", "")
             command = input(a.paintText(f"{self.ActiveDirectory} ➢")+"  ")
             self.execute(command)
             
